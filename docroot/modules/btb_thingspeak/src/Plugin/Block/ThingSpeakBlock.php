@@ -12,11 +12,40 @@
 namespace Drupal\btb_thingspeak\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Drupal\node\Entity\Node;
+use Drupal\btb_thingspeak\ThingSpeakClient;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\btb_thingspeak\ThingSpeakClientInterface;
 
-class ThingSpeakBlock extends BlockBase {
+class ThingSpeakBlock extends BlockBase implements ContainerFactoryPluginInterface{
+
+  // Implementation of ThingSpeakClientInterface.
+  protected $thingspeak_client;
+
+  /**
+   * ThingSpeakBlock constructor.
+   *
+   * @param array $configuration
+   * @param string $plugin_id
+   * @param mixed $plugin_definition
+   * @param ThingSpeakClientInterface $thingspeak_client
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ThingSpeakClientInterface $thingspeak_client) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->thingspeak_client = $thingspeak_client;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('btb_thingspeak.client')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -25,55 +54,10 @@ class ThingSpeakBlock extends BlockBase {
     return ['label_display' => TRUE];
   }
 
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createLocation($lat, $long) {
-
-    $point_str = 'POINT (' . $long . ' ' . $lat . ')';
-
-    $node = Node::create(array(
-      'nid' => NULL,
-      'type' => 'location',
-      'title' => 'Mary Maersk',
-      'uid' => 1,
-      'status' => TRUE,
-      'field_geolocation' => $point_str
-    ));
-    $node->save();
-
-
-  }
-
-  public function getFeedData() {
-
-    $client = \Drupal::httpClient();
-    $request = $client->request('GET',
-      'https://api.thingspeak.com/channels/113245/feeds.json',
-      ['query' => 'api_key=ETJ1ES8LFQYC0EKP&amp;results=2']);
-    $response = $request->getBody()->getContents();
-
-    $params = json_decode($response);
-    $lat = $params->feeds[0]->field1;
-    $long = $params->feeds[0]->field2;
-
-    $this->createLocation($lat, $long);
-
-
-    //kint($params->feeds[0]->field1);
-
-    // test
-    // $this->createLocation(21.23234, 114.42442);
-
-    return 'Last location of the Mary Maersk Container Ship: Latitude: ' . $lat . ', Longitude: ' . $long;
-
-  }
-
   public function build() {
     // Return the block, and don't cache it!
     return array(
-      '#markup' => $this->t($this->getFeedData()),
+      '#markup' => $this->t($this->thingspeak_client->getFeedData()),
       '#cache' => array(
         'max-age' => 0,
       ),
