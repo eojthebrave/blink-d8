@@ -1,0 +1,7 @@
+name: btb_thingspeak
+type: module
+description: Beyond the Blink Pub Sub Example Module
+core: 8.x
+package: Beyond the Blink
+dependencies:
+  - block
