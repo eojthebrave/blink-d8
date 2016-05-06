@@ -1,0 +1,14 @@
+global-styling:
+  css:
+    theme:
+      css/global.css: {}
+
+leaflet:
+  css:
+    theme:
+      css/leaflet.css: {}
+  js:
+    js/leaflet.js: {}
+    js/map.js: {}
+  dependencies:
+    - core/jquery

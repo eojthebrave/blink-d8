@@ -1,0 +1,11 @@
+name: geoPHP
+type: module
+description: Wraps the geoPHP library advanced geometry operations in PHP
+# core: 8.x
+package: Geo
+
+# Information added by Drupal.org packaging script on 2015-11-23
+version: '8.x-1.0-beta1+5-dev'
+core: '8.x'
+project: 'geophp'
+datestamp: 1448303667

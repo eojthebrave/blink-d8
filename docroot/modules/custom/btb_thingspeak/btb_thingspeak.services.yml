@@ -1,7 +1,0 @@
-# Service definition in YAML.
-services:
-  custom_http_client.client:
-    class: GuzzleHttp\Client
-    factory: btb_thingspeak.client.factory:get
-  custom_http_client.client.factory:
-    class: Drupal\btb_thingspeak\ClientFactory
